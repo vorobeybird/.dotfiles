@@ -1,6 +1,6 @@
-require("lua/options")
-require("lua/keymaps")
-require("lua/plugins")
+require("options")
+require("keymaps")
+require("plugins")
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
