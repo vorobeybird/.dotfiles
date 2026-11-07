@@ -1,0 +1,82 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // Automatically format files after write/edit tools
+  "formatter": true,
+
+  // Notify when updates are available
+  "update": "notify",
+
+  // Ignore common build artifacts and caches from file watching
+  "watcher": {
+    "ignore": ["dist/**", "build/**", "coverage/**", ".next/**", "target/**"]
+  },
+
+  // Only show and allow models from OpenCode Go ("opencode-go")
+  "policies": [
+    { "action": "provider.use", "resource": "*", "effect": "deny" },
+    { "action": "provider.use", "resource": "opencode-go", "effect": "allow" }
+  ],
+
+  // Permissions (evaluated in order; last matching rule wins)
+  "permissions": [
+    // Ask before accessing directories outside the current workspace
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+
+    // Ask before running arbitrary shell commands by default
+    { "action": "shell", "resource": "*", "effect": "ask" },
+
+    // Allow safe read-only Git and dotfiles (config) inspection commands
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch *", "effect": "allow" },
+    { "action": "shell", "resource": "config status *", "effect": "allow" },
+    { "action": "shell", "resource": "config diff *", "effect": "allow" },
+    { "action": "shell", "resource": "config log *", "effect": "allow" },
+
+    // Allow GitHub CLI inspection commands
+    { "action": "shell", "resource": "gh pr view *", "effect": "allow" },
+    { "action": "shell", "resource": "gh pr list *", "effect": "allow" },
+    { "action": "shell", "resource": "gh pr diff *", "effect": "allow" },
+    { "action": "shell", "resource": "gh pr checks *", "effect": "allow" },
+    { "action": "shell", "resource": "gh issue view *", "effect": "allow" },
+    { "action": "shell", "resource": "gh issue list *", "effect": "allow" },
+    { "action": "shell", "resource": "gh run view *", "effect": "allow" },
+    { "action": "shell", "resource": "gh run list *", "effect": "allow" },
+
+    // Allow SSH/SCP to your remote machine via environment variables or SSH host alias
+    { "action": "shell", "resource": "ssh {env:OPENCODE_REMOTE_SSH} *", "effect": "allow" },
+    { "action": "shell", "resource": "ssh -p {env:OPENCODE_REMOTE_PORT} {env:OPENCODE_REMOTE_HOST} *", "effect": "allow" },
+    { "action": "shell", "resource": "ssh $OPENCODE_REMOTE_HOST -p $OPENCODE_REMOTE_PORT *", "effect": "allow" },
+    { "action": "shell", "resource": "ssh -p $OPENCODE_REMOTE_PORT $OPENCODE_REMOTE_HOST *", "effect": "allow" },
+    { "action": "shell", "resource": "ssh remote-work *", "effect": "allow" },
+    { "action": "shell", "resource": "scp -P {env:OPENCODE_REMOTE_PORT} * {env:OPENCODE_REMOTE_HOST}:*", "effect": "allow" },
+    { "action": "shell", "resource": "scp -P {env:OPENCODE_REMOTE_PORT} {env:OPENCODE_REMOTE_HOST}:* *", "effect": "allow" },
+    { "action": "shell", "resource": "scp * remote-work:*", "effect": "allow" },
+    { "action": "shell", "resource": "scp remote-work:* *", "effect": "allow" },
+
+    // Block git push unless run manually
+    { "action": "shell", "resource": "git push *", "effect": "deny" },
+    { "action": "shell", "resource": "config push *", "effect": "deny" },
+
+    // Allow loading all configured skills
+    { "action": "skill", "resource": "*", "effect": "allow" }
+  ],
+
+  // Useful slash commands
+  "commands": {
+    "review": {
+      "description": "Review uncommitted changes for bugs and missing tests",
+      "template": "Review the current git diff for correctness, security, edge cases, and missing tests."
+    },
+    "commit": {
+      "description": "Stage and create a concise git commit",
+      "template": "Inspect git status and git diff, then stage the relevant changes and create a clear, concise commit message."
+    },
+    "remote": {
+      "description": "Run a task or inspect state on the remote work machine",
+      "template": "Connect to the remote machine using the `remote-ssh` skill guidelines. $ARGUMENTS"
+    }
+  }
+}
